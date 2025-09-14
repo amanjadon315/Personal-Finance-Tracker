@@ -1,0 +1,79 @@
+# Multi-stage build for Finance Tracker Application
+
+# Stage 1: Build the React frontend
+FROM node:18-alpine as frontend-build
+
+# Set working directory for frontend
+WORKDIR /app/client
+
+# Copy frontend package files
+COPY client/package*.json ./
+
+# Install frontend dependencies
+RUN npm ci --only=production
+
+# Copy frontend source code
+COPY client/ ./
+
+# Build the frontend
+RUN npm run build
+
+# Stage 2: Build the backend
+FROM node:18-alpine as backend-build
+
+# Set working directory for backend
+WORKDIR /app/server
+
+# Copy backend package files
+COPY server/package*.json ./
+
+# Install backend dependencies
+RUN npm ci --only=production
+
+# Copy backend source code
+COPY server/ ./
+
+# Stage 3: Create the final runtime image
+FROM node:18-alpine
+
+# Set working directory
+WORKDIR /app
+
+# Install dumb-init for proper signal handling
+RUN apk add --no-cache dumb-init
+
+# Create non-root user for security
+RUN addgroup -g 1001 -S nodejs
+RUN adduser -S finance -u 1001
+
+# Copy backend from build stage
+COPY --from=backend-build /app/server ./server
+COPY --from=backend-build /app/server/node_modules ./server/node_modules
+
+# Copy built frontend from build stage
+COPY --from=frontend-build /app/client/build ./server/public
+
+# Create necessary directories and set permissions
+RUN mkdir -p /app/server/logs && \
+    chown -R finance:nodejs /app
+
+# Switch to non-root user
+USER finance
+
+# Set working directory to server
+WORKDIR /app/server
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+  CMD node -e "require('http').get('http://localhost:${PORT:-5000}/api/health', (res) => { \
+    if (res.statusCode === 200) process.exit(0); else process.exit(1); \
+  }).on('error', () => process.exit(1));"
+
+# Expose the port the app runs on
+EXPOSE 5000
+
+# Use dumb-init to handle signals properly
+ENTRYPOINT ["dumb-init", "--"]
+
+# Start the application
+CMD ["node", "server.js"]

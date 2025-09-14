@@ -1,0 +1,123 @@
+{
+  "name": "finance-tracker",
+  "version": "1.0.0",
+  "description": "A comprehensive personal finance tracking application with secure authentication and financial analytics",
+  "main": "server/server.js",
+  "private": true,
+  "scripts": {
+    "dev": "concurrently \"npm run server:dev\" \"npm run client:dev\"",
+    "start": "npm run server:start",
+    "build": "npm run client:build && npm run server:build",
+    "test": "npm run client:test && npm run server:test",
+    "lint": "npm run client:lint && npm run server:lint",
+    "format": "npm run client:format && npm run server:format",
+    "client:dev": "cd client && npm start",
+    "client:build": "cd client && npm run build",
+    "client:test": "cd client && npm test",
+    "client:lint": "cd client && npm run lint",
+    "client:format": "cd client && npm run format",
+    "client:install": "cd client && npm install",
+    "server:dev": "cd server && npm run dev",
+    "server:start": "cd server && npm start",
+    "server:build": "cd server && npm run build",
+    "server:test": "cd server && npm test",
+    "server:lint": "cd server && npm run lint",
+    "server:format": "cd server && npm run format",
+    "server:install": "cd server && npm install",
+    "install:all": "npm install && npm run client:install && npm run server:install",
+    "clean": "npm run client:clean && npm run server:clean",
+    "client:clean": "cd client && rm -rf node_modules build",
+    "server:clean": "cd server && rm -rf node_modules dist",
+    "docker:build": "docker build -t finance-tracker .",
+    "docker:run": "docker run -p 5000:5000 finance-tracker",
+    "docker:dev": "docker-compose -f docker-compose.dev.yml up --build",
+    "docker:prod": "docker-compose --profile production up -d --build",
+    "docker:stop": "docker-compose down",
+    "docker:logs": "docker-compose logs -f",
+    "docker:clean": "docker-compose down -v --rmi all",
+    "setup": "npm run install:all && npm run build",
+    "heroku:deploy": "git push heroku main",
+    "vercel:deploy": "cd client && npx vercel --prod",
+    "backup:db": "node scripts/backup-database.js",
+    "restore:db": "node scripts/restore-database.js",
+    "seed:data": "node scripts/seed-data.js",
+    "migrate:up": "node scripts/migrate-up.js",
+    "migrate:down": "node scripts/migrate-down.js",
+    "health:check": "curl -f http://localhost:5000/api/health || exit 1",
+    "security:audit": "npm audit && cd client && npm audit && cd ../server && npm audit",
+    "security:fix": "npm audit fix && cd client && npm audit fix && cd ../server && npm audit fix"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/yourusername/finance-tracker.git"
+  },
+  "keywords": [
+    "finance",
+    "personal-finance",
+    "expense-tracker",
+    "budget",
+    "money-management",
+    "react",
+    "nodejs",
+    "mongodb",
+    "express",
+    "financial-analytics"
+  ],
+  "author": {
+    "name": "Your Name",
+    "email": "your.email@example.com",
+    "url": "https://yourwebsite.com"
+  },
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/yourusername/finance-tracker/issues"
+  },
+  "homepage": "https://github.com/yourusername/finance-tracker#readme",
+  "engines": {
+    "node": ">=16.0.0",
+    "npm": ">=8.0.0"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.0",
+    "@types/node": "^20.4.5",
+    "eslint": "^8.45.0",
+    "prettier": "^3.0.0",
+    "husky": "^8.0.3",
+    "lint-staged": "^13.2.3"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged",
+      "pre-push": "npm test"
+    }
+  },
+  "lint-staged": {
+    "client/**/*.{js,jsx,ts,tsx}": [
+      "cd client && npm run lint",
+      "cd client && npm run format"
+    ],
+    "server/**/*.{js,ts}": [
+      "cd server && npm run lint",
+      "cd server && npm run format"
+    ]
+  },
+  "workspaces": [
+    "client",
+    "server"
+  ],
+  "config": {
+    "mongoUrl": "mongodb://localhost:27017/finance-tracker",
+    "port": "5000"
+  },
+  "funding": {
+    "type": "individual",
+    "url": "https://github.com/sponsors/yourusername"
+  },
+  "contributors": [
+    {
+      "name": "Your Name",
+      "email": "your.email@example.com",
+      "url": "https://github.com/yourusername"
+    }
+  ]
+}
